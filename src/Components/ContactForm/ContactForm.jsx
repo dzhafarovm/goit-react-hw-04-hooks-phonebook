@@ -1,75 +1,78 @@
-import React, { Component } from "react";
-import shortid from "shortid";
-import css from "./ContactForm.module.css";
+import { useState, useRef } from 'react';
+import shortid from 'shortid';
+import css from './ContactForm.module.css';
 
-export class ContactForm extends Component {
-  state = {
-    name: "",
-    number: "",
+export const ContactForm = ({ onSubmit }) => {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
+
+  const nameId = useRef(shortid.generate());
+  const numberId = useRef(shortid.generate());
+
+  const handleContactChange = e => {
+    switch (e.target.name) {
+      case 'name':
+        setName(e.target.value);
+        break;
+
+      case 'number':
+        setNumber(e.target.value);
+        break;
+
+      default:
+        return;
+    }
   };
 
-  nameId = shortid.generate();
-  numberId = shortid.generate();
-
-  handleContactChange = (e) => {
-    const { name, value } = e.target;
-    this.setState({ [name]: value });
-  };
-
-  handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
 
-    this.props.onSubmit(this.state);
-    this.reset();
+    onSubmit({ name, number });
+    setName('');
+    setNumber('');
   };
 
-  reset = () => {
-    this.setState({ name: "", number: "" });
-  };
+  return (
+    <div>
+      <form onSubmit={handleSubmit} className={css.form}>
+        <label htmlFor={nameId.current} className={css.label}>
+          Name:
+          <input
+            className={css.name}
+            type="text"
+            name="name"
+            value={name}
+            id={nameId.current}
+            onChange={handleContactChange}
+            pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+            title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
+            required
+          />
+        </label>
 
-  render() {
-    return (
-      <div>
-        <form onSubmit={this.handleSubmit} className={css.form}>
-          <label htmlFor={this.nameId} className={css.label}>
-            Name:
-            <input
-              className={css.name}
-              type="text"
-              name="name"
-              value={this.state.name}
-              id={this.nameId}
-              onChange={this.handleContactChange}
-              pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-              title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
-              required
-            />
-          </label>
+        <br />
 
-          <br />
+        <label htmlFor={numberId.current} className={css.label}>
+          Number:
+          <input
+            className={css.number}
+            type="tel"
+            name="number"
+            value={number}
+            id={numberId.current}
+            onChange={handleContactChange}
+            pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+            title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
+            required
+          />
+        </label>
 
-          <label htmlFor={this.numberId} className={css.label}>
-            Number:
-            <input
-              className={css.number}
-              type="tel"
-              name="number"
-              value={this.state.number}
-              id={this.numberId}
-              onChange={this.handleContactChange}
-              pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-              title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
-              required
-            />
-          </label>
+        <br />
 
-          <br />
-
-          <button type="submit" className={css.btn}>
-            add contact
-          </button>
-        </form>
-      </div>
-    );
-  }
-}
+        <button type="submit" className={css.btn}>
+          add contact
+        </button>
+      </form>
+    </div>
+  );
+};

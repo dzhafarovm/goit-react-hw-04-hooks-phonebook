@@ -1,31 +1,21 @@
-import React, { Component } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import shortid from "shortid";
-import { ContactForm } from "./Components/ContactForm/ContactForm.jsx";
-import { ContactList } from "./Components/ContactList/ContactList.jsx";
-import { Filter } from "./Components/Filter/Filter.jsx";
+import { useState, useEffect } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import shortid from 'shortid';
+import { ContactForm } from './Components/ContactForm/ContactForm.jsx';
+import { ContactList } from './Components/ContactList/ContactList.jsx';
+import { Filter } from './Components/Filter/Filter.jsx';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: "",
-  };
+export const App = () => {
+  const [contacts, setContacts] = useState(() => {
+    return JSON.parse(localStorage.getItem('myContacts') ?? []);
+  });
+  const [filter, setFilter] = useState('');
 
-  componentDidMount() {
-    const contacts = localStorage.getItem("myContacts");
-    const parsContacts = JSON.parse(contacts);
-    if (parsContacts) {
-      this.setState({ contacts: parsContacts });
-    }
-  }
+  useEffect(() => {
+    localStorage.setItem('myContacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem("myContacts", JSON.stringify(this.state.contacts));
-    }
-  }
-
-  addContact = (data) => {
+  const addContact = data => {
     const contact = {
       id: shortid.generate(),
       name: data.name,
@@ -33,62 +23,49 @@ export class App extends Component {
     };
 
     if (
-      this.state.contacts.find(
-        (con) => con.name.toLowerCase() === contact.name.toLowerCase()
+      contacts.find(
+        con => con.name.toLowerCase() === contact.name.toLowerCase(),
       )
     ) {
-      // toast(`${contact.name} is alresdy in contacts`);
       toast(`${contact.name} is alresdy in contacts`, {
-        icon: "❗❗❗",
+        icon: '❗❗❗',
         style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
         },
       });
       return;
     } else
-      this.setState((prevState) => ({
-        contacts: [...prevState.contacts, contact].sort((a, b) =>
-          a.name.localeCompare(b.name)
-        ),
-      }));
+      setContacts(
+        [...contacts, contact].sort((a, b) => a.name.localeCompare(b.name)),
+      );
   };
 
-  deleteContacs = (contactId) => {
-    this.setState((prevState) => ({
-      contacts: prevState.contacts.filter(
-        (contact) => contact.id !== contactId
-      ),
-    }));
+  const deleteContacs = contactId => {
+    setContacts(contacts.filter(contact => contact.id !== contactId));
   };
 
-  onFilterInputValue = (e) => {
-    this.setState({ filter: e.target.value });
-  };
+  const onFilterInputValue = e => setFilter(e.target.value);
 
-  onFilteredContacts = () => {
-    const { filter, contacts } = this.state;
-    return contacts.filter((contact) =>
-      contact.name.toLowerCase().includes(filter.toLowerCase())
+  const onFilteredContacts = () => {
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase()),
     );
   };
 
-  render() {
-    const { filter } = this.state;
-    return (
-      <div>
-        <h1>Phonebook</h1>
-        <ContactForm onSubmit={this.addContact} />
+  return (
+    <div>
+      <h1>Phonebook</h1>
+      <ContactForm onSubmit={addContact} />
 
-        <h2>Contacts</h2>
-        <Filter value={filter} onFilterInputValue={this.onFilterInputValue} />
-        <ContactList
-          contacts={this.onFilteredContacts()}
-          onDeleteContact={this.deleteContacs}
-        />
-        <Toaster position="top-right" />
-      </div>
-    );
-  }
-}
+      <h2>Contacts</h2>
+      <Filter value={filter} onFilterInputValue={onFilterInputValue} />
+      <ContactList
+        contacts={onFilteredContacts()}
+        onDeleteContact={deleteContacs}
+      />
+      <Toaster position="top-right" />
+    </div>
+  );
+};
