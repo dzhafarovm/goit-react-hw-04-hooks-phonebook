@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import shortid from 'shortid';
 import css from './ContactForm.module.css';
 
@@ -75,4 +76,8 @@ export const ContactForm = ({ onSubmit }) => {
       </form>
     </div>
   );
+};
+
+ContactForm.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
 };
